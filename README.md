@@ -9,6 +9,43 @@ Intercept adversarial inputs, physically unsafe actions, and anomalous inference
 
 ---
 
+## Interactive Demo
+
+A browser-based Three.js simulation that visualizes the SDK's guard pipeline in real time. Split-screen comparison of an **unprotected** robot (left) vs. an **AEGIS-protected** robot (right) across 4 attack scenarios.
+
+[![Demo Video](https://img.youtube.com/vi/i-5o6GxYsfY/maxresdefault.jpg)](https://youtu.be/i-5o6GxYsfY)
+
+> **[Watch the full demo on YouTube](https://youtu.be/i-5o6GxYsfY)**
+
+### Attack Scenarios
+
+| Scenario | Description | Risk Level |
+|----------|-------------|------------|
+| NaN Injection | NaN/Inf values injected into action tensor — unprotected arm disappears, protected arm halts safely | BLOCKED (1.0) |
+| Joint Limit Violation | Joints pushed past [-π, π] bounds — unprotected arm contorts, protected arm clamps | WARNING (0.6) |
+| Velocity Spike | Extreme position jumps every 1.5s — unprotected arm teleports, protected arm interpolates smoothly | SAFE (0.0) |
+| Autoregressive Drift | Cumulative per-frame bias — unprotected arm drifts away, protected arm corrects | DANGER (0.8) |
+
+<p align="center">
+  <img src="docs/img1.png" width="49%" alt="NaN Injection — BLOCKED (risk 1.0)">
+  <img src="docs/img4.png" width="49%" alt="Joint Limit Violation — WARNING (risk 0.6)">
+</p>
+<p align="center">
+  <img src="docs/img3.png" width="49%" alt="Velocity Spike — SAFE (risk 0.0)">
+  <img src="docs/img2.png" width="49%" alt="Autoregressive Drift — DANGER (risk 0.8)">
+</p>
+
+### Run Locally
+
+```bash
+cd demo && python3 -m http.server 8080
+# Open http://localhost:8080
+```
+
+No build step required — pure ES Modules + Three.js CDN.
+
+---
+
 ## About This Research
 
 This project is led by **Kwangil Kim** and **Seokju Kang**, Research Directors at **[Yatav Inc.](https://yatav.com)**, as part of the AEGIS (AI Engine for Guardrail & Inspection System) initiative — a broader program dedicated to adversarial robustness and safety verification across LLM, multimodal, and embodied AI systems.
@@ -406,8 +443,18 @@ aegis-dreamdojo-sdk/
 ├── Cargo.toml                 # Independent crate (not workspace member)
 ├── LICENSE                    # Apache-2.0
 ├── README.md                  # This file
+├── demo/                      # Three.js robot simulation demo
+│   ├── index.html             # Entry point (import map + Three.js CDN)
+│   ├── css/styles.css         # Dark theme, split layout, dashboard
+│   └── js/
+│       ├── guards.js          # SDK guard logic ported to JS
+│       ├── robot.js           # 7-DOF robot arm (Three.js primitives)
+│       ├── scenarios.js       # 4 attack scenario generators
+│       ├── dashboard.js       # Risk gauge, guard cards, violation log
+│       └── app.js             # Main: dual renderer, animation loop
 ├── docs/
-│   └── SECURITY_ANALYSIS.md   # Full red team analysis report
+│   ├── SECURITY_ANALYSIS.md   # Full red team analysis report
+│   └── img1~4.png             # Demo screenshots
 ├── src/
 │   ├── lib.rs                 # Module declarations + prelude re-exports
 │   ├── types.rs               # All public types, enums, configs (~550 lines)
